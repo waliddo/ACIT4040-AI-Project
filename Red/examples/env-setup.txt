@@ -1,0 +1,13 @@
+Anaconda setup:
+
+conda create -n tf-gpu python=3.8 tensorflow-gpu
+conda activate tf-gpu
+conda install -c intel mkl-service
+conda install -c conda-forge mkl-service
+conda install -c conda-forge tqdm
+conda install -c conda-forge matplotlib
+conda install -c conda-forge keras
+conda install -c pytorch pytorch
+conda install -c conda-forge/label/cf202003 opencv
+conda install -c pytorch torchvision
+conda install -c conda-forge libwebp
