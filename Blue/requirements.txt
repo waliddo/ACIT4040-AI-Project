@@ -1,3 +1,5 @@
 numpy
 tensorflow
 matplotlib
+scipy
+opencv-python
