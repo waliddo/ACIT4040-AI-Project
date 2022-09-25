@@ -8,12 +8,6 @@ from scipy import ndimage
 from itertools import chain
 
 
-def showIm(desc, img):
-    cv2.imshow(desc, img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
 def hpass(img):
     f1 = [[1], [-1]]
     f2 = [[1, -1]]
