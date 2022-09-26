@@ -5,7 +5,7 @@ import imutils
 from imutils import face_utils
 import scipy 
 from config import (
-    TRI_FILE, FACESWAP_DIR, LANDMARKS_DIR, REFERENCE_IMG
+    TRI_FILE, FACESWAP_DIR, LANDMARKS_DIR, REFERENCE_IMG, REFERENCE_DIR
 )
 
 
@@ -74,7 +74,7 @@ def get_txtfile(path1, path2):
 
     extension1 = os.path.splitext(path1)[1]
     extension2 = os.path.splitext(path2)[1]
-    txt_path1 = f'{LANDMARKS_DIR}/reference_img/{path1}'.replace(extension1, '.txt') # Ref image
+    txt_path1 = f'{LANDMARKS_DIR}{REFERENCE_DIR[1:]}/{path1}'.replace(extension1, '.txt') # Ref image
     txt_path2 = f'{LANDMARKS_DIR}/{path2}'.replace(extension2, '.txt')
 
     return txt_path1, txt_path2
