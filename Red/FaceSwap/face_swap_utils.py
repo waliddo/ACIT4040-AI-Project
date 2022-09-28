@@ -5,7 +5,7 @@ import imutils
 from imutils import face_utils
 import scipy 
 from config import (
-    TRI_FILE, FACESWAP_DIR, LANDMARKS_DIR, REFERENCE_IMG, REFERENCE_DIR
+    TRI_FILE, FACESWAP_DIR, LANDMARKS_DIR, REFERENCE_IMG, REFERENCE_DIR, IMG_SIZE
 )
 
 
@@ -41,7 +41,7 @@ def generate_facial_landmarks(img_path, detector, predictor):
     """
     # Load the input image, resize it, and convert it to grayscale
     image = cv2.imread(img_path)
-    image = imutils.resize(image, width=500)
+    image = imutils.resize(image, width=IMG_SIZE)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Detect faces in the grayscale image
@@ -292,8 +292,8 @@ def create_face_swap(path1, path2, method='cv2'):
     img1 = cv2.imread(path1)
     img2 = cv2.imread(path2)
 
-    img1 = imutils.resize(img1, width = 500)
-    img2 = imutils.resize(img2, width = 500)
+    img1 = imutils.resize(img1, width = IMG_SIZE)
+    img2 = imutils.resize(img2, width = IMG_SIZE)
     img1_warped = np.copy(img2)
 
     txt_path1, txt_path2 = get_txtfile(path1, path2)

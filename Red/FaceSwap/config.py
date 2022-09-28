@@ -4,6 +4,7 @@ LANDMARKS_DIR = './facial-landmarks'
 FACESWAP_DIR = './faceswaps'
 REFERENCE_DIR = './reference_img'
 TRI_FILE = './tri.txt'
+IMG_SIZE = 1024
 
 REFERENCE_IMG = f'{REFERENCE_DIR}/ted_cruz.jpeg'
 
