@@ -1,3 +1,7 @@
 numpy
 tensorflow
 matplotlib
+scipy
+opencv-python
+scikit-learn
+numba
