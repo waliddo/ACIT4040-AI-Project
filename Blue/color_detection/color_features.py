@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 from scipy import ndimage
 from itertools import chain
+from numba import jit
 
 
 def hpass(img):
@@ -53,6 +54,7 @@ def HS_Cb_Cr(hsv, ycbcr):
     return thrH, thrS, thrCb, thrCr
 
 
+@jit(nopython=True)
 def binz(img):
     out = []
     for i in img:
@@ -67,6 +69,7 @@ def binz(img):
     return np.uint8(out)
 
 
+@jit(nopython=True)
 def threshold(img):
     out = []
     th = 2
@@ -83,6 +86,7 @@ def threshold(img):
     return np.uint8(out)
 
 
+@jit(nopython=True)
 def co_occurence(mat, n):
     d = 3
     right = [0 for i in range(pow(n, d))]
@@ -140,6 +144,5 @@ def get_features(image):
     cocrCr1 = co_occurence(resdCr[0], 5)
     cocrCr2 = co_occurence(resdCr[1], 5)
     cocrCr = np.mean([cocrCr1[0], cocrCr1[1], cocrCr2[0], cocrCr2[1]], axis=0)
-
     features = list(chain(cocrRGB, cocrH, cocrS, cocrCb, cocrCr))
     return features
