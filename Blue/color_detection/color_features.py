@@ -1,6 +1,9 @@
 """
 A refactored implementation of image color features from:
 https://github.com/Aniladepu007/Detection-of-Deep-Network-Generated-Images-Using-Disparities-in-Color-Components
+
+This implementation also differs in that it uses Numba for a significant
+performance boost.
 """
 import numpy as np
 import cv2
@@ -114,6 +117,15 @@ def co_occurence(mat, n):
 
 
 def get_features(image):
+    """
+    Get color features for a given image.
+
+    Args:
+        image (list): Image in BGR format.
+
+    Returns:
+        np.ndarray: 300-dimenional array with HSCbCr color features.
+    """
 
     imgHSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     imgYCrCb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
@@ -121,13 +133,12 @@ def get_features(image):
     # Residuals post-threshold.
     resdH, resdS, resdCb, resdCr = HS_Cb_Cr(imgHSV, imgYCrCb)
 
-    assmbldRGBf1, assmbldRGBf2 = rgb(image)
-
-    cocrRGBf1 = co_occurence(assmbldRGBf1, 8)
-    cocrRGBf2 = co_occurence(assmbldRGBf2, 8)
-
-    cocrRGB = np.mean([cocrRGBf1[0], cocrRGBf1[1],
-                      cocrRGBf2[0], cocrRGBf2[1]], axis=0)
+    # Uncomment for RGB
+    # assmbldRGBf1, assmbldRGBf2 = rgb(image)
+    # cocrRGBf1 = co_occurence(assmbldRGBf1, 8)
+    # cocrRGBf2 = co_occurence(assmbldRGBf2, 8)
+    # cocrRGB = np.mean([cocrRGBf1[0], cocrRGBf1[1],
+    #                    cocrRGBf2[0], cocrRGBf2[1]], axis=0)
 
     cocrH1 = co_occurence(resdH[0], 5)
     cocrH2 = co_occurence(resdH[1], 5)
@@ -144,5 +155,5 @@ def get_features(image):
     cocrCr1 = co_occurence(resdCr[0], 5)
     cocrCr2 = co_occurence(resdCr[1], 5)
     cocrCr = np.mean([cocrCr1[0], cocrCr1[1], cocrCr2[0], cocrCr2[1]], axis=0)
-    features = list(chain(cocrRGB, cocrH, cocrS, cocrCb, cocrCr))
+    features = list(chain(cocrH, cocrS, cocrCb, cocrCr))
     return features
