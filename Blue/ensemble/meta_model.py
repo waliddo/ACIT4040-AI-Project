@@ -48,7 +48,7 @@ class MetaModel:
     def plot_accuracy(self, history):
         print(history.history.keys())
         plt.plot(history.history['accuracy'], label='Train')
-        plt.plot(history.history['val_accuracy'], label='Test')
+        plt.plot(history.history['val_accuracy'], label='Validation')
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy')
         plt.ylim([0.0, 1.1])
