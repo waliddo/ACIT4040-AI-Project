@@ -1,8 +1,8 @@
 from sklearn.linear_model import SGDOneClassSVM
-import color_features
+import color_detection.color_features as color
 import numpy as np
 import joblib
-import color_data
+import color_detection.color_data
 import os
 import cv2
 from ensemble.weak_learner import WeakLearner
@@ -28,9 +28,9 @@ class ColorClassifier(WeakLearner):
         Returns:
             np.ndarray: Prediction where 0 means fake and 1 means real.
         """
-        if len(np.shape(img) == 3):
+        if len(np.shape(img)) == 3:
             return self.predict_once(img)
-        elif len(np.shape(img) == 4):
+        elif len(np.shape(img)) == 4:
             predictions = []
             for image in img:
                 predictions.append(self.predict_once(image)[0])
@@ -40,8 +40,8 @@ class ColorClassifier(WeakLearner):
 
     def predict_once(self, img: np.ndarray):
         if not self.is_bgr:
-            image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        features = color_features.get_features(image)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        features = color.get_features(img)
         features = np.reshape(features, (1, len(features)))
         prediction = self.classifier.predict(features)
         return np.clip(prediction, 0, 1)

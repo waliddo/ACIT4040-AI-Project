@@ -1,34 +1,8 @@
-import cv2
 import os
-import color_features
+import color_detection.color_features as color
 import numpy as np
 import matplotlib.pyplot as plt
-
-
-def load_imgs(dir: str, limit: int) -> list:
-    """
-    Reads all images in a given directory.
-
-    Args:
-        dir (str): Path to a directory of images.
-        limit (int): Max amount of images to load.
-
-    Returns:
-        list: All images.
-    """
-    imgs = []
-    for file in os.listdir(dir):
-        file_name, file_extension = os.path.splitext(file)
-        if file_extension.lower() in [".png", ".jpg", "jpeg"]:
-            imgs.append(cv2.imread(os.path.join(dir, file)))
-            if len(imgs) >= limit:
-                break
-    return imgs
-
-
-def write_imgs(imgs, dir):
-    for index, img in enumerate(imgs):
-        cv2.imwrite(os.path.join(dir, f"{index}.png"), img)
+from data.data_loader import load_imgs
 
 
 def load_data(path: str, n: int) -> list:
@@ -45,7 +19,7 @@ def load_data(path: str, n: int) -> list:
     imgs = load_imgs(path, n)
     features = []
     for img in imgs:
-        features.append(color_features.get_features(img))
+        features.append(color.get_features(img))
     return np.array(features)
 
 
@@ -93,8 +67,8 @@ if __name__ == '__main__':
     real_path = os.path.join(root, "..", "data", "celebahq", "real", "test")
     fake_imgs = load_imgs(fake_path, 1000)
     real_imgs = load_imgs(real_path, 1000)
-    fake_features = [color_features.get_features(img) for img in fake_imgs]
-    real_features = [color_features.get_features(img) for img in real_imgs]
+    fake_features = [color.get_features(img) for img in fake_imgs]
+    real_features = [color.get_features(img) for img in real_imgs]
     fake_avrg = np.mean(fake_features, axis=0)
     real_avrg = np.mean(real_features, axis=0)
     diff = np.abs(fake_avrg - real_avrg)
