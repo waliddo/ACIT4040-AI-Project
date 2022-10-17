@@ -15,7 +15,7 @@ class MetaModel:
         self.model = self.build_model()
 
     def predict(self, input: np.ndarray):
-        self.model.predict(input)
+        return self.model.predict(input)
 
     def build_model(self) -> Sequential:
         model = Sequential()
