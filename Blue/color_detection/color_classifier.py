@@ -1,55 +1,50 @@
 from sklearn.linear_model import SGDOneClassSVM
-import color_features
+import color_detection.color_features as color
 import numpy as np
 import joblib
-import color_data
+import color_detection.color_data
 import os
 import cv2
+from ensemble.weak_learner import WeakLearner
 
 
-class ColorClassifier:
+class ColorClassifier(WeakLearner):
     """
     Classifies images as real or fake based on its color features.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, bgr: bool) -> None:
+        self.is_bgr = bgr
         self.classifier = SGDOneClassSVM(nu=0.85)
 
-    def predict(self, image, rgb=False):
+    def predict(self, img: np.ndarray) -> np.ndarray:
         """
         Predict whether an image is real or fake based on its color features.
 
         Args:
-            image (np.ndarray): Image in BGR form (default for cv2).
-            rgb (bool): If the image is in RGB format.
+            img (np.ndarray): Image(s) in BGR form (default for cv2).
+            rgb (bool): If the image(s) is in RGB format.
 
         Returns:
             np.ndarray: Prediction where 0 means fake and 1 means real.
         """
-        if rgb:
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        features = color_features.get_features(image)
+        if len(np.shape(img)) == 3:
+            return self.predict_once(img)
+        elif len(np.shape(img)) == 4:
+            predictions = []
+            for image in img:
+                predictions.append(self.predict_once(image)[0])
+            return np.array(predictions)
+        else:
+            raise ValueError(f"Invalid image shape: {np.shape(img)}")
+
+    def predict_once(self, img: np.ndarray):
+        if not self.is_bgr:
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        features = color.get_features(img)
         features = np.reshape(features, (1, len(features)))
         prediction = self.classifier.predict(features)
         return np.clip(prediction, 0, 1)
-
-    def predict_all(self, images, rgb=False):
-        """
-        Create a prediction for all given images.
-
-        Args:
-            images (np.ndarray): Array of images in BGR format.
-            rgb (bool): If the images are in RGB format.
-
-        Returns:
-            np.ndarray: Prediction where 0 means fake and 1 means real.
-        """
-        # features = [color_features.get_features(image) for image in images]
-        # return np.clip(self.classifier.predict(features), 0, 1)
-        predictions = []
-        for image in images:
-            predictions.append(self.predict(image, rgb=rgb)[0])
-        return np.array(predictions)
 
     def train(self, data):
         """
@@ -115,7 +110,7 @@ if __name__ == '__main__':
     fake_path = os.path.join(root, "..", "data", "celebahq", "fake")
     real_path = os.path.join(root, "..", "data", "celebahq", "real")
 
-    clf = ColorClassifier()
+    clf = ColorClassifier(bgr=True)
 
     # Train the model
     # train, test, test_labels = \
