@@ -33,8 +33,6 @@ def main():
 
         if dst_faceBoxes is None:
             print(f'Detect 0 Face !!! Image: {i} {imgs[i]}')
-            continue
-            #exit(-1)
         else:
             output = dst_img
             for k, dst_face in dst_faceBoxes.items():
