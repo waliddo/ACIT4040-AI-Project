@@ -215,9 +215,8 @@ def face_swap(src_face, dst_face, src_points, dst_points, dst_shape, dst_img, en
     warped_src_face = correct_colours(dst_face_masked, warped_src_face, dst_points)
     
     # ## 2d warp
-    # unwarped_src_face = warp_image_3d(warped_src_face, dst_points[:end], src_points[:end], src_face.shape[:2])
-    # warped_src_face = warp_image_2d(unwarped_src_face, transformation_from_points(dst_points, src_points),
-    #                                 (h, w, 3))
+    #unwarped_src_face = warp_image_3d(warped_src_face, dst_points[:end], src_points[:end], src_face.shape[:2])
+    #warped_src_face = warp_image_2d(unwarped_src_face, transformation_from_points(dst_points, src_points),(h, w, 3))
 
     # mask = mask_from_points((h, w), dst_points)
     # mask_src = np.mean(warped_src_face, axis=2) > 0
@@ -235,4 +234,10 @@ def face_swap(src_face, dst_face, src_points, dst_points, dst_shape, dst_img, en
     dst_img_cp = dst_img.copy()
     dst_img_cp[y:y + h, x:x + w] = output
 
+    # alpha_s = warped_src_face[:, :, 2] / 255.0
+    # alpha_l = 1.0 - alpha_s
+
+    # for c in range(3):
+    #     dst_img_cp[y:y + h, x:x + w, c] = alpha_s * warped_src_face[:,:,c] + alpha_l * dst_img_cp[y:y + h, x:x + w, c] 
+    
     return dst_img_cp

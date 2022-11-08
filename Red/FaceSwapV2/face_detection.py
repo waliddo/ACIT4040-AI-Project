@@ -11,7 +11,6 @@ def face_detection(img,upsample_times=1):
     # will make everything bigger and allow us to detect more faces.
     detector = dlib.get_frontal_face_detector()
     faces = detector(img, upsample_times)
-
     return faces
 
 
