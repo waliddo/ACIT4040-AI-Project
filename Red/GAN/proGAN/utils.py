@@ -3,10 +3,8 @@ import random
 import numpy as np
 import os
 import torchvision
-import torch.nn as nn
 import config
 from torchvision.utils import save_image
-from scipy.stats import truncnorm
 
 # Print losses occasionally and print to tensorboard
 def plot_to_tensorboard(
@@ -20,6 +18,7 @@ def plot_to_tensorboard(
         img_grid_real = torchvision.utils.make_grid(real[:8], normalize=True)
         img_grid_fake = torchvision.utils.make_grid(fake[:8], normalize=True)
         img_grid_fake_with_alpha = torchvision.utils.make_grid(fake_with_alpha[:8], normalize=True)
+
         writer.add_image(f"{config.MODEL_NAME} Real", img_grid_real, global_step=tensorboard_step)
         writer.add_image(f"{config.MODEL_NAME} Fake", img_grid_fake, global_step=tensorboard_step)
         writer.add_image(f"{config.MODEL_NAME} Fake with alpha", img_grid_fake_with_alpha, global_step=tensorboard_step)
@@ -77,3 +76,15 @@ def seed_everything(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
+def save_images(gen, step, n=100):
+    print(f'creating and saving images at size: {4 * 2**step}')
+
+    gen.eval()
+    alpha = 1.0
+    for i in range(n):
+        with torch.no_grad():
+            noise = torch.randn(1, config.Z_DIM, 1, 1).to(config.DEVICE)
+            img = gen(noise, alpha, step)
+            save_image(img*0.5+0.5, f"saved_images/img_1{i}_size{4 * 2**step}.png")
+    gen.train()

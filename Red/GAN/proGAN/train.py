@@ -1,6 +1,6 @@
 '''
 Inspired by:
-https://www.youtube.com/watch?v=nkQHASviYac&ab_channel=AladdinPersson
+https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/GANs/ProGAN
 '''
 
 import os
@@ -15,9 +15,10 @@ from utils import (
     plot_to_tensorboard,
     save_checkpoint,
     load_checkpoint,
+    save_images,
 )
 from model import Generator, Discriminator
-from math import log2
+from math import log2, isnan
 from tqdm import tqdm
 import config
 
@@ -81,25 +82,29 @@ def train_fn(
                 + (0.001 * torch.mean(critic_real ** 2)) # add drift (avoid critic to far from 0)
             )
         
-        opt_critic.zero_grad()
-        scaler_critic.scale(loss_critic).backward()
-        scaler_critic.step(opt_critic)
-        scaler_critic.update()
+        if (isnan(gp) == False and isnan(loss_critic) == False):
+            opt_critic.zero_grad()
+            scaler_critic.scale(loss_critic).backward()
+            scaler_critic.step(opt_critic)
+            scaler_critic.update()
 
         # Train Generator: max E[critic(gen_fake)]
         with torch.cuda.amp.autocast():
             gen_fake = critic(fake, alpha, step)
             loss_gen = -torch.mean(gen_fake)
 
-        opt_gen.zero_grad()
-        scaler_gen.scale(loss_gen).backward()
-        scaler_gen.step(opt_gen)
-        scaler_gen.update()
+        if (isnan(loss_gen) == False):
+            opt_gen.zero_grad()
+            scaler_gen.scale(loss_gen).backward()
+            scaler_gen.step(opt_gen)
+            scaler_gen.update()
+
 
 
         # Update alpha (fade in)
         # alpha is 0 at start of new image size, alpha is scaled up to 1 after half the image_size epochs, train at alpha = 1 of the remainding epochs
-        alpha += cur_batch_size / (len(dataset) * config.PROGRESSIVE_EPOCHS[step] * 0.5)
+        # alpha += cur_batch_size / (len(dataset) * config.PROGRESSIVE_EPOCHS[step] * 0.5)
+        alpha += cur_batch_size / (len(dataset) * config.PROGRESSIVE_EPOCHS[step]) # smooth scaling over whole epoch
         alpha = min(alpha, 1)
 
         # plot to tensorboard
@@ -142,21 +147,31 @@ def main():
     scaler_gen = torch.cuda.amp.GradScaler()
 
     # tensorboad plotting
-    writer = SummaryWriter(f'logs/{config.MODEL_NAME}')
-
-    if config.LOAD_MODEL:
-        load_checkpoint(config.CHECKPOINT_GEN, gen, opt_gen, config.LEARNING_RATE)
-        load_checkpoint(config.CHECKPOINT_DIS, critic, opt_critic, config.LEARNING_RATE)
-
-    gen.train()
-    critic.train()
+    writer = SummaryWriter(f'logs/{config.MODEL_NAME}{config.NAME_EXTENSION}')
 
     tensorboard_step = 0
     step = int(log2(config.START_TRAIN_AT_IMG_SIZE / 4))
     print(f'step: {step}')
 
+    if config.LOAD_MODEL:
+        print(f'loading model: {config.MODEL_PATH}/{4 * 2**step}_generator.pth')
+        load_checkpoint(config.CHECKPOINT_GEN, gen, opt_gen, config.LEARNING_RATE)
+        load_checkpoint(config.CHECKPOINT_DIS, critic, opt_critic, config.LEARNING_RATE)
+        # load_checkpoint(f'{config.MODEL_PATH}/{4 * 2**step}_generator.pth', gen, opt_gen, config.LEARNING_RATE)
+        # load_checkpoint(f'{config.MODEL_PATH}/{4 * 2**step}_generator.pth', gen, opt_gen, config.LEARNING_RATE)
+
+    gen.train()
+    critic.train()
+
+    if config.SAVE_IMAGES:
+        save_images(gen, config.SAVE_IAMGES_LAYER)
+        return
+    
     for num_epochs in config.PROGRESSIVE_EPOCHS[step:]: # can have different num of epochs at each image size
         alpha = 1e-5 # set to one if loading model to generate images
+        if (config.SAVE_IMAGES):
+            alpha = 1 # set to one if loading model to generate images
+        
         loader, dataset = get_loader(4 * 2**step)
         print(f'Image size: {4 * 2**step}')
 
@@ -180,8 +195,10 @@ def main():
             )
 
             if config.SAVE_MODEL:
-                save_checkpoint(gen, opt_gen, filename=config.CHECKPOINT_GEN)
-                save_checkpoint(critic, opt_critic, filename=config.CHECKPOINT_DIS)
+                # save_checkpoint(gen, opt_gen, filename=config.CHECKPOINT_GEN)
+                # save_checkpoint(critic, opt_critic, filename=config.CHECKPOINT_DIS)
+                save_checkpoint(gen, opt_gen, filename=f'{config.MODEL_PATH}/{4 * 2**step}_generator.pth')
+                save_checkpoint(critic, opt_critic, filename=f'{config.MODEL_PATH}/{4 * 2**step}_discriminator.pth')
 
         step += 1 # progress to next image size
 
