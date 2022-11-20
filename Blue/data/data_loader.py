@@ -29,19 +29,20 @@ def load_imgs(dir: str, limit: int, rgb=False) -> list:
 
 
 def load_data(real_dir: str, fake_dir: str, n: int, rgb: bool):
-    real = load_imgs(real_dir, int(n / 2), rgb=rgb)
+    # real = load_imgs(real_dir, int(n / 2), rgb=rgb)
     fake = load_imgs(fake_dir, int(n / 2), rgb=rgb)
-    real_fake = np.concatenate([real, fake])
+    # real_fake = np.concatenate([real, fake])
 
-    fake_labels = np.zeros(shape=(len(real)))
-    real_labels = np.ones(shape=(len(fake)))
-    labels = np.concatenate([real_labels, fake_labels])
-    labels = labels.astype(np.uint8)
-    idx = np.random.permutation(len(real_fake))
-    real_fake = real_fake[idx]
-    labels = labels[idx]
+    fake_labels = np.zeros(shape=(len(fake)))
+    # real_labels = np.ones(shape=(len(real)))
+    # labels = np.concatenate([real_labels, fake_labels])
+    # labels = labels.astype(np.uint8)
+    idx = np.random.permutation(len(fake_labels))
+    # real_fake = real_fake[idx]
+    fake_labels = fake_labels[idx]
+    # labels = labels[idx]
 
-    return (real_fake, labels)
+    return (fake, fake_labels)
 
 
 def load_train_test(real_dir: str, train_n: int,
